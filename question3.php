@@ -28,22 +28,24 @@ function formatDaysDifference($date1, $date2) {
     $date2_valid = DateTime::createFromFormat('Y-m-d', $date2) !== false;
 
     if (!$date1_valid || !$date2_valid) {
-        echo "Error: Please enter dates in YYYY-MM-DD format.";
-        return;
+        return "Error: Please enter dates in YYYY-MM-DD format.";
     }
 
     $daysDifference = calculateDaysDifference($date1, $date2);
-    $oddOrEven = isNumberOddOrEven($daysDifference);
+    $oddOrEvenDays = isNumberOddOrEven($daysDifference);
 
-    echo "Number of days between $date1 and $date2: $daysDifference days, and it is $oddOrEven.\n";
-    echo "The day of the date $date1 is " . isDateDayOddOrEven($date1) . ".\n";
-    echo "The day of the date $date2 is " . isDateDayOddOrEven($date2) . ".\n";
+    $date1DayOddOrEven = isDateDayOddOrEven($date1);
+    $date2DayOddOrEven = isDateDayOddOrEven($date2);
+
+    return "Number of days between $date1 and $date2: $daysDifference days, and it is $oddOrEvenDays.\n" .
+           "The day of the date $date1 is $date1DayOddOrEven.\n" .
+           "The day of the date $date2 is $date2DayOddOrEven.\n";
 }
 
 // Example usage
 $date1 = "2024-06-02";
 $date2 = "2024-06-27";
-formatDaysDifference($date1, $date2);
+echo formatDaysDifference($date1, $date2);
 
 
 /* Result:
