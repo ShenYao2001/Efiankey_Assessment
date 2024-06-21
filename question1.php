@@ -2,59 +2,54 @@
 session_start();
 
 function checkDownload($memberType) {
-    // Check if session variables are initialized for non-members
-    if (!isset($_SESSION['downloads_nonmember'])) {
-        $_SESSION['downloads_nonmember'] = [];
-    }
-    
-    // Check if session variables are initialized for members
-    if (!isset($_SESSION['downloads_member'])) {
-        $_SESSION['downloads_member'] = [];
+    // Ensure session variables are initialized
+    if (!isset($_SESSION['downloads'])) {
+        $_SESSION['downloads'] = [
+            'nonmember' => [],
+            'member' => []
+        ];
     }
 
     // Current time
     $currentTime = time();
-    
-    // Remove timestamps older than 5 seconds for non-members
-    $_SESSION['downloads_nonmember'] = array_filter($_SESSION['downloads_nonmember'], function($timestamp) use ($currentTime) {
+
+    // Remove timestamps older than 5 seconds
+    $_SESSION['downloads']['nonmember'] = array_filter($_SESSION['downloads']['nonmember'], function($timestamp) use ($currentTime) {
         return ($currentTime - $timestamp) <= 5;
     });
 
-    // Remove timestamps older than 5 seconds for members
-    $_SESSION['downloads_member'] = array_filter($_SESSION['downloads_member'], function($timestamp) use ($currentTime) {
+    $_SESSION['downloads']['member'] = array_filter($_SESSION['downloads']['member'], function($timestamp) use ($currentTime) {
         return ($currentTime - $timestamp) <= 5;
     });
 
-    // Count recent downloads for non-members
-    $downloadCount_nonmember = count($_SESSION['downloads_nonmember']);
+    if ($memberType === 'member') {
+        $downloadCount = count($_SESSION['downloads']['member']);
 
-    // Count recent downloads for members
-    $downloadCount_member = count($_SESSION['downloads_member']);
-
-    if ($memberType == 'member') {
-        if ($downloadCount_member < 2) {
+        if ($downloadCount < 2) {
             // Members can download up to 2 times consecutively without waiting
-            $_SESSION['downloads_member'][] = $currentTime;
-            return "Your download is starting... \n";
+            $_SESSION['downloads']['member'][] = $currentTime;
+            return "Your download is starting...\n";
         } else {
             // For the 3rd download and more, members must wait 5 seconds since the last download
-            if ($currentTime - end($_SESSION['downloads_member']) < 5) {
-                return "Too many downloads \n";
+            if ($currentTime - end($_SESSION['downloads']['member']) < 5) {
+                return "Too many downloads\n";
             } else {
-                $_SESSION['downloads_member'][] = $currentTime;
-                return "Your download is starting... \n";
+                $_SESSION['downloads']['member'][] = $currentTime;
+                return "Your download is starting...\n";
             }
         }
-    } else if ($memberType == 'nonmember') {
+    } elseif ($memberType === 'nonmember') {
+        $downloadCount = count($_SESSION['downloads']['nonmember']);
+
         // Non-members must wait 5 seconds between each download
-        if ($downloadCount_nonmember > 0 && ($currentTime - end($_SESSION['downloads_nonmember']) < 5)) {
-            return "Too many downloads \n";
+        if ($downloadCount > 0 && ($currentTime - end($_SESSION['downloads']['nonmember']) < 5)) {
+            return "Too many downloads\n";
         } else {
-            $_SESSION['downloads_nonmember'][] = $currentTime;
-            return "Your download is starting... \n";
+            $_SESSION['downloads']['nonmember'][] = $currentTime;
+            return "Your download is starting...\n";
         }
     } else {
-        return "Invalid member type \n";
+        return "Invalid member type\n";
     }
 }
 
